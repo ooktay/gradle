@@ -35,6 +35,7 @@ import org.gradle.cache.internal.DefaultCrossBuildInMemoryCacheFactory;
 import org.gradle.internal.Cast;
 import org.gradle.internal.event.DefaultListenerManager;
 import org.gradle.internal.event.ListenerManager;
+import org.gradle.internal.reflect.ParameterValidationContext;
 import org.gradle.internal.reflect.PropertyMetadata;
 import org.gradle.internal.service.DefaultServiceLocator;
 import org.gradle.internal.service.ServiceRegistration;
@@ -175,9 +176,6 @@ public class PropertyValidationAccess {
             for (PropertyMetadata propertyMetadata : typeMetadata.getPropertiesMetadata()) {
                 String qualifiedPropertyName = getQualifiedPropertyName(propertyMetadata.getPropertyName());
                 Class<? extends Annotation> propertyType = propertyMetadata.getPropertyType();
-                if (propertyType == null) {
-                    continue;
-                }
                 PropertyValidator validator = PROPERTY_VALIDATORS.get(propertyType);
                 if (validator != null) {
                     String validationMessage = validator.validate(stricterValidation, propertyMetadata);

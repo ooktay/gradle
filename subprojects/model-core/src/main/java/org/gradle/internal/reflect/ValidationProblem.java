@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package org.gradle.api.internal.tasks.properties;
+package org.gradle.internal.reflect;
 
 import javax.annotation.Nullable;
 
-public interface ParameterValidationContext {
-    ParameterValidationContext NOOP = new ParameterValidationContext() {
-        @Override
-        public void recordValidationMessage(@Nullable String ownerPath, String propertyName, String message) {
-        }
-
-        @Override
-        public void recordValidationMessage(String message) {
-        }
-    };
-
-    void recordValidationMessage(@Nullable String ownerPath, String propertyName, String message);
-
-    void recordValidationMessage(String message);
+public interface ValidationProblem {
+    void collect(@Nullable String ownerPropertyPath, ParameterValidationContext validationContext);
 }

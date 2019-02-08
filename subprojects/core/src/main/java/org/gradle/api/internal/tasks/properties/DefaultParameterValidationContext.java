@@ -16,6 +16,8 @@
 
 package org.gradle.api.internal.tasks.properties;
 
+import org.gradle.internal.reflect.ParameterValidationContext;
+
 import javax.annotation.Nullable;
 import java.util.Collection;
 

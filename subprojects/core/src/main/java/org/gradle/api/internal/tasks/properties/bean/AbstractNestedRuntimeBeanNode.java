@@ -23,7 +23,6 @@ import org.gradle.api.Task;
 import org.gradle.api.internal.provider.ProducerAwareProperty;
 import org.gradle.api.internal.provider.PropertyInternal;
 import org.gradle.api.internal.tasks.properties.BeanPropertyContext;
-import org.gradle.api.internal.tasks.properties.ParameterValidationContext;
 import org.gradle.api.internal.tasks.properties.PropertyValue;
 import org.gradle.api.internal.tasks.properties.PropertyVisitor;
 import org.gradle.api.internal.tasks.properties.TypeMetadata;
@@ -31,6 +30,7 @@ import org.gradle.api.internal.tasks.properties.annotations.PropertyAnnotationHa
 import org.gradle.api.provider.Provider;
 import org.gradle.internal.Factory;
 import org.gradle.internal.UncheckedException;
+import org.gradle.internal.reflect.ParameterValidationContext;
 import org.gradle.internal.reflect.PropertyMetadata;
 import org.gradle.util.DeprecationLogger;
 
@@ -49,8 +49,8 @@ public abstract class AbstractNestedRuntimeBeanNode extends RuntimeBeanNode<Obje
         typeMetadata.collectValidationFailures(getPropertyName(), validationContext);
         for (PropertyMetadata propertyMetadata : typeMetadata.getPropertiesMetadata()) {
             PropertyAnnotationHandler annotationHandler = typeMetadata.getAnnotationHandlerFor(propertyMetadata);
-            String propertyName = getQualifiedPropertyName(propertyMetadata.getPropertyName());
-            if (annotationHandler != null && annotationHandler.shouldVisit(visitor)) {
+            if (annotationHandler.shouldVisit(visitor)) {
+                String propertyName = getQualifiedPropertyName(propertyMetadata.getPropertyName());
                 PropertyValue value = new BeanPropertyValue(getBean(), propertyMetadata.getGetterMethod());
                 annotationHandler.visitPropertyValue(propertyName, value, propertyMetadata, visitor, new BeanPropertyContext() {
                     @Override
