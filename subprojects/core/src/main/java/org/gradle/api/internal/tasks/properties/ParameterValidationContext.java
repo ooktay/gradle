@@ -16,12 +16,20 @@
 
 package org.gradle.api.internal.tasks.properties;
 
+import javax.annotation.Nullable;
+
 public interface ParameterValidationContext {
     ParameterValidationContext NOOP = new ParameterValidationContext() {
+        @Override
+        public void recordValidationMessage(@Nullable String ownerPath, String propertyName, String message) {
+        }
+
         @Override
         public void recordValidationMessage(String message) {
         }
     };
+
+    void recordValidationMessage(@Nullable String ownerPath, String propertyName, String message);
 
     void recordValidationMessage(String message);
 }

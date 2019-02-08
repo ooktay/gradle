@@ -48,6 +48,7 @@ import org.gradle.internal.reflect.PropertyExtractor;
 import org.gradle.internal.reflect.PropertyMetadata;
 import org.gradle.internal.scripts.ScriptOrigin;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -144,6 +145,15 @@ public class DefaultTypeMetadataStore implements TypeMetadataStore {
         DefaultTypeMetadata(ImmutableSet<PropertyMetadata> propertiesMetadata, ImmutableMap<Class<? extends Annotation>, PropertyAnnotationHandler> annotationHandlers) {
             this.propertiesMetadata = propertiesMetadata;
             this.annotationHandlers = annotationHandlers;
+        }
+
+        @Override
+        public void collectValidationFailures(@Nullable String ownerPropertyPath, ParameterValidationContext validationContext) {
+            for (PropertyMetadata metadata : propertiesMetadata) {
+                for (String validationMessage : metadata.getValidationMessages()) {
+                    validationContext.recordValidationMessage(ownerPropertyPath, metadata.getPropertyName(), validationMessage);
+                }
+            }
         }
 
         @Override

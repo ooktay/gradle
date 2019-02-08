@@ -39,8 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Queue;
 
-import static org.gradle.api.internal.tasks.properties.DefaultParameterValidationContext.propertyValidationMessage;
-
 public abstract class AbstractNestedRuntimeBeanNode extends RuntimeBeanNode<Object> {
     protected AbstractNestedRuntimeBeanNode(@Nullable RuntimeBeanNode<?> parentNode, @Nullable String propertyName, Object bean, TypeMetadata typeMetadata) {
         super(parentNode, propertyName, bean, typeMetadata);
@@ -48,12 +46,10 @@ public abstract class AbstractNestedRuntimeBeanNode extends RuntimeBeanNode<Obje
 
     public void visitProperties(PropertyVisitor visitor, final Queue<RuntimeBeanNode<?>> queue, final RuntimeBeanNodeFactory nodeFactory, ParameterValidationContext validationContext) {
         TypeMetadata typeMetadata = getTypeMetadata();
+        typeMetadata.collectValidationFailures(getPropertyName(), validationContext);
         for (PropertyMetadata propertyMetadata : typeMetadata.getPropertiesMetadata()) {
             PropertyAnnotationHandler annotationHandler = typeMetadata.getAnnotationHandlerFor(propertyMetadata);
             String propertyName = getQualifiedPropertyName(propertyMetadata.getPropertyName());
-            for (String validationMessage : propertyMetadata.getValidationMessages()) {
-                validationContext.recordValidationMessage(propertyValidationMessage(propertyName, validationMessage));
-            }
             if (annotationHandler != null && annotationHandler.shouldVisit(visitor)) {
                 PropertyValue value = new BeanPropertyValue(getBean(), propertyMetadata.getGetterMethod());
                 annotationHandler.visitPropertyValue(propertyName, value, propertyMetadata, visitor, new BeanPropertyContext() {

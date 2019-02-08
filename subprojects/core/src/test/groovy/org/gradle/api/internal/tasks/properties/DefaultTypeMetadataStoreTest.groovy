@@ -103,8 +103,8 @@ class DefaultTypeMetadataStoreTest extends Specification {
         def propertyMetadata = propertiesMetadata.first()
         propertyMetadata.propertyName == 'searchPath'
         propertyMetadata.propertyType == SearchPath
-        propertyMetadata.validationMessages.empty
         typeMetadata.getAnnotationHandlerFor(propertyMetadata) == annotationHandler
+        collectProblems(typeMetadata).empty
     }
 
     @Unroll
@@ -200,12 +200,13 @@ class DefaultTypeMetadataStoreTest extends Specification {
         def metadataStore = new DefaultTypeMetadataStore(services.getAll(PropertyAnnotationHandler) + [new ClasspathPropertyAnnotationHandler()], new TestCrossBuildInMemoryCacheFactory())
 
         when:
-        def typeMetadata = metadataStore.getTypeMetadata(ClasspathPropertyTask).propertiesMetadata.findAll { !isIgnored(it) }
+        def typeMetadata = metadataStore.getTypeMetadata(ClasspathPropertyTask)
 
         then:
-        typeMetadata*.propertyName as List == ["inputFiles1", "inputFiles2"]
-        typeMetadata*.propertyType as List == [Classpath, Classpath]
-        typeMetadata*.validationMessages.flatten().empty
+        def properties = typeMetadata.propertiesMetadata.findAll { !isIgnored(it) }
+        properties*.propertyName as List == ["inputFiles1", "inputFiles2"]
+        properties*.propertyType as List == [Classpath, Classpath]
+        collectProblems(typeMetadata).empty
     }
 
     @Unroll
@@ -251,10 +252,14 @@ class DefaultTypeMetadataStoreTest extends Specification {
 
     def "can get properties that are not annotated"() {
         when:
-        def properties = metadataStore.getTypeMetadata(Unannotated).propertiesMetadata
+        def metadata = metadataStore.getTypeMetadata(Unannotated)
 
         then:
-        properties.propertyName == ["bad1", "bad2", "ignore1", "ignore2"]
+        metadata.propertiesMetadata.propertyName == ["bad1", "bad2", "ignore1", "ignore2"]
+        collectProblems(metadata) == [
+            "Property 'bad1' is not annotated with an input or output annotation.",
+            "Property 'bad2' is not annotated with an input or output annotation."
+        ]
     }
 
     @SuppressWarnings("GroovyUnusedDeclaration")
@@ -275,6 +280,12 @@ class DefaultTypeMetadataStoreTest extends Specification {
         void setFeature2(boolean enabled) {
             this.feature2 = enabled
         }
+    }
+
+    private static List<String> collectProblems(TypeMetadata metadata) {
+        def result = []
+        metadata.collectValidationFailures(null, new DefaultParameterValidationContext(result))
+        return result
     }
 
     private static boolean isOfType(PropertyMetadata metadata, Class<? extends Annotation> type) {

@@ -23,8 +23,12 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public interface TypeMetadata {
+    void collectValidationFailures(@Nullable String ownerPropertyPath, ParameterValidationContext validationContext);
+
     Set<PropertyMetadata> getPropertiesMetadata();
+
     boolean hasAnnotatedProperties();
+
     @Nullable
     PropertyAnnotationHandler getAnnotationHandlerFor(PropertyMetadata propertyMetadata);
 }
